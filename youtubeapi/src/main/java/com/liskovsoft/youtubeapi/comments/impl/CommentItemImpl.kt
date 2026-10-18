@@ -5,12 +5,14 @@ import com.liskovsoft.sharedutils.helpers.Helpers
 import com.liskovsoft.youtubeapi.comments.gen.CommentItemWrapper
 import com.liskovsoft.youtubeapi.comments.gen.getContinuationKey
 import com.liskovsoft.youtubeapi.comments.gen.getContinuationLabel
+import com.liskovsoft.youtubeapi.comments.gen.isLikeToggled
 import com.liskovsoft.youtubeapi.common.models.gen.getOptimalResThumbnailUrl
 import com.liskovsoft.youtubeapi.common.models.gen.getText
 
 internal data class CommentItemImpl(val commentItemWrapper: CommentItemWrapper): CommentItem {
     private val commentRenderer by lazy {
-        commentItemWrapper.commentThreadRenderer?.comment?.commentRenderer
+        // Top-level comments come wrapped in a thread, replies (detail view) come as bare renderers
+        commentItemWrapper.commentThreadRenderer?.comment?.commentRenderer ?: commentItemWrapper.commentRenderer
     }
 
     private val idItem by lazy { commentRenderer?.commentId }
@@ -27,7 +29,7 @@ internal data class CommentItemImpl(val commentItemWrapper: CommentItemWrapper):
 
     private val replyCountItem by lazy { commentRenderer?.getContinuationLabel()?.replace(" ", Helpers.NON_BREAKING_SPACE) }
 
-    private val isLikedItem by lazy { commentRenderer?.isLiked ?: false }
+    private val isLikedItem by lazy { commentRenderer?.isLiked == true || commentRenderer?.isLikeToggled() == true }
 
     private val likeCountItem by lazy { commentRenderer?.voteCount?.getText() }
 

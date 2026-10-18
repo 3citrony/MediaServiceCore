@@ -19,3 +19,5 @@ internal fun CommentRenderer.getLikeParams() = actionButtons?.commentActionButto
 internal fun CommentRenderer.getUnLikeParams() = actionButtons?.commentActionButtonsRenderer?.likeButton?.toggleButtonRenderer?.getToggleParams()
 internal fun CommentRenderer.getDislikeParams() = actionButtons?.commentActionButtonsRenderer?.dislikeButton?.toggleButtonRenderer?.getDefaultParams()
 internal fun CommentRenderer.getUnDislikeParams() = actionButtons?.commentActionButtonsRenderer?.dislikeButton?.toggleButtonRenderer?.getToggleParams()
+internal fun CommentRenderer.isLikeToggled() = actionButtons?.commentActionButtonsRenderer?.likeButton?.toggleButtonRenderer?.isToggled == true
+internal fun CommentRenderer.isDislikeToggled() = actionButtons?.commentActionButtonsRenderer?.dislikeButton?.toggleButtonRenderer?.isToggled == true

@@ -4,7 +4,10 @@ import com.liskovsoft.mediaserviceinterfaces.data.CommentGroup
 import com.liskovsoft.youtubeapi.comments.gen.getDislikeParams
 import com.liskovsoft.youtubeapi.comments.gen.getLikeParams
 import com.liskovsoft.youtubeapi.comments.gen.getActiveCommentItem
+import com.liskovsoft.youtubeapi.comments.gen.getUnDislikeParams
 import com.liskovsoft.youtubeapi.comments.gen.getUnLikeParams
+import com.liskovsoft.youtubeapi.comments.gen.isDislikeToggled
+import com.liskovsoft.youtubeapi.comments.gen.isLikeToggled
 import com.liskovsoft.youtubeapi.comments.impl.CommentGroupImpl
 import com.liskovsoft.googlecommon.common.helpers.RetrofitHelper
 
@@ -19,14 +22,15 @@ internal object CommentsServiceInt {
     fun toggleLike(key: String) {
         val commentsResult = getCommentsResult(key)
         val activeCommentItem = commentsResult?.getActiveCommentItem()
-        val likeParam = activeCommentItem?.let { if (it.isLiked == true) it.getUnLikeParams() else it.getLikeParams() }
+        val likeParam = activeCommentItem?.let { if (it.isLiked == true || it.isLikeToggled()) it.getUnLikeParams() else it.getLikeParams() }
         likeParam?.let { getActionResult(it) }
     }
 
     fun toggleDislike(key: String) {
         val commentsResult = getCommentsResult(key)
-        val likeParam = commentsResult?.getActiveCommentItem()?.getDislikeParams()
-        likeParam?.let { getActionResult(it) }
+        val activeCommentItem = commentsResult?.getActiveCommentItem()
+        val dislikeParam = activeCommentItem?.let { if (it.isDislikeToggled()) it.getUnDislikeParams() else it.getDislikeParams() }
+        dislikeParam?.let { getActionResult(it) }
     }
 
     private fun getCommentsResult(commentsKey: String) = RetrofitHelper.get(mApi.getComments(CommentsApiParams.getCommentsQuery(commentsKey)))
