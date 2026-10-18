@@ -18,6 +18,7 @@ import com.liskovsoft.youtubeapi.videoinfo.models.VideoInfo;
 import com.liskovsoft.youtubeapi.videoinfo.models.VideoInfoHls;
 import com.liskovsoft.youtubeapi.videoinfo.models.VideoInfoReel;
 
+import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -54,6 +55,7 @@ public class VideoInfoService extends VideoInfoServiceBase {
     private boolean mUseAuth;
     private List<TranslationLanguage> mCachedTranslationLanguages;
     private boolean mIsUnplayable;
+    private boolean mRecentTypeRestored;
 
     private VideoInfoService() {
         mVideoInfoApi = RetrofitHelper.create(VideoInfoApi.class);
@@ -117,6 +119,7 @@ public class VideoInfoService extends VideoInfoServiceBase {
 
     private VideoInfo firstInfoWith(String videoId, String clickTrackingParams, InfoTester infoTester) {
         //final AppClient beginType = getDefaultClient();
+        restoreRecentTypeIfNeeded();
         final AppClient beginType = mNextInfoType != null ? mNextInfoType : VIDEO_INFO_TYPE_LIST[0];
         AppClient nextType = beginType;
 
@@ -291,6 +294,28 @@ public class VideoInfoService extends VideoInfoServiceBase {
         }
 
         getData().setVideoInfoType(mActualInfoType != null ? mActualInfoType.ordinal() : -1);
+    }
+
+    /**
+     * Start from the client that worked last time (persisted by {@link #persistRecentTypeIfNeeded}),
+     * instead of re-discovering it through failed playback after every app start.
+     */
+    private void restoreRecentTypeIfNeeded() {
+        if (mRecentTypeRestored || mNextInfoType != null || !GlobalPreferences.isInitialized()) {
+            return;
+        }
+
+        mRecentTypeRestored = true;
+
+        int type = getData().getVideoInfoType();
+        AppClient[] clients = AppClient.values();
+
+        if (type < 0 || type >= clients.length || !Arrays.asList(VIDEO_INFO_TYPE_LIST).contains(clients[type])) {
+            return;
+        }
+
+        mActualInfoType = clients[type];
+        mNextInfoType = clients[type];
     }
 
     private void persistRecentTypeIfNeeded(VideoInfo videoInfo) {
