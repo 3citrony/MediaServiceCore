@@ -19,6 +19,10 @@ internal object YouTubeCommentsService: CommentsService {
         key?.let { CommentsServiceInt.toggleDislike(key) }
     }
 
+    override fun createReplyObserve(videoId: String, commentId: String, text: String): Observable<Boolean> {
+        return RxHelper.fromCallable { CommentsServiceInt.createReply(videoId, commentId, text) }
+    }
+
     override fun getCommentsObserve(key: String?): Observable<CommentGroup> {
         return RxHelper.fromCallable { getComments(key) }
     }

@@ -33,6 +33,14 @@ internal object CommentsServiceInt {
         dislikeParam?.let { getActionResult(it) }
     }
 
+    /** Tries the TV client first (same as the rest of the comments API), then WEB. */
+    fun createReply(videoId: String, commentId: String, text: String): Boolean {
+        return listOf(false, true).any { web ->
+            val response = RetrofitHelper.getResponse(mApi.createCommentReply(CommentsApiParams.getCreateReplyQuery(videoId, commentId, text, web)))
+            response?.isSuccessful == true && response.body()?.actionResult?.status.let { it == null || it == "STATUS_SUCCEEDED" }
+        }
+    }
+
     private fun getCommentsResult(commentsKey: String) = RetrofitHelper.get(mApi.getComments(CommentsApiParams.getCommentsQuery(commentsKey)))
 
     private fun getActionResult(actionKey: String) = RetrofitHelper.get(mApi.commentAction(CommentsApiParams.getActionQuery(actionKey)))
